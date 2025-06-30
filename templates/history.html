@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Food History</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: rgb(240, 134, 134)eae;
+      font-family: Arial, sans-serif;
+    }
+    .filter-form {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Food History</h2>
+    
+    <!-- Filter Form -->
+    <form method="GET" action="{{ url_for('history') }}" class="filter-form">
+      <div class="row justify-content-center">
+        <div class="col-md-3">
+          <input type="date" name="date" class="form-control" value="{{ request.args.get('date', '') }}">
+        </div>
+        <div class="col-md-3">
+          <input type="text" name="food" class="form-control" placeholder="Food Name" value="{{ request.args.get('food', '') }}">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+      </div>
+    </form>
+    
+    {% if history %}
+      <table class="table table-bordered table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>Date</th>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Food Name</th>
+            <th>Quantity (g)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in history %}
+          <tr>
+            <td>{{ item.date }}</td>
+            <td>{{ item.timestamp }}</td>
+            <td>{{ item.username }}</td>
+            <td>{{ item.food_name }}</td>
+            <td>{{ item.quantity }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-center">No history records found.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

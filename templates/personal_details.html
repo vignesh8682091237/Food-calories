@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Details</title>
+</head>
+<body style="font-family: Arial, sans-serif; background: linear-gradient(to bottom, #ffefba, #ffffff); text-align: center; margin: 0; padding: 20px;">
+
+    <h2 style="color: #333;">Personal Details</h2>
+
+    <!-- Personal Details Display -->
+    <div id="detailsView" style="margin: 20px auto; display: inline-block; text-align: left; padding: 20px; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background-color: white;">
+        <p style="margin: 10px 0; color: #555;">Name: <span id="nameDisplay">{{ user.get('name', '') }}</span></p>
+        <p style="margin: 10px 0; color: #555;">Age: <span id="ageDisplay">{{ user.get('age', '') }}</span></p>
+        <p style="margin: 10px 0; color: #555;">Weight: <span id="weightDisplay">{{ user.get('weight', '') }}</span></p>
+        <p style="margin: 10px 0; color: #555;">Height: <span id="heightDisplay">{{ user.get('height', '') }}</span></p>
+        <p style="margin: 10px 0; color: #555;">Mobile: <span id="mobileDisplay">{{ user.get('mobile', '') }}</span></p>
+        <p style="margin: 10px 0; color: #555;">Email: <span id="emailDisplay">{{ user.get('email', '') }}</span></p>
+
+        <button onclick="editDetails()" 
+            style="margin-top: 20px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+            Edit Details
+        </button>
+    </div>
+
+    <!-- Edit Form -->
+    <div id="editView" style="display: none; margin: 20px auto; text-align: left; padding: 20px; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background-color: white;">
+        <label>Name:</label>
+        <input type="text" id="editName" class="input-field" />
+
+        <label>Age:</label>
+        <input type="number" id="editAge" class="input-field" />
+
+        <label>Weight:</label>
+        <input type="number" id="editWeight" class="input-field" />
+
+        <label>Height:</label>
+        <input type="number" id="editHeight" class="input-field" />
+
+        <label>Mobile:</label>
+        <input type="text" id="editMobile" class="input-field" required pattern="^[0-9]{10}$" />
+
+        <label>Email:</label>
+        <input type="email" id="editEmail" class="input-field" />
+
+        <button onclick="saveDetails()" 
+            style="margin-top: 20px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+            Save
+        </button>
+        <button onclick="cancelEdit()" 
+            style="margin-top: 20px; padding: 10px 20px; background-color: #f44336; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+            Cancel
+        </button>
+    </div>
+
+    <script>
+        function editDetails() {
+            document.getElementById('detailsView').style.display = 'none';
+            document.getElementById('editView').style.display = 'block';
+
+            document.getElementById('editName').value = document.getElementById('nameDisplay').innerText;
+            document.getElementById('editAge').value = document.getElementById('ageDisplay').innerText;
+            document.getElementById('editWeight').value = document.getElementById('weightDisplay').innerText;
+            document.getElementById('editHeight').value = document.getElementById('heightDisplay').innerText;
+            document.getElementById('editMobile').value = document.getElementById('mobileDisplay').innerText;
+            document.getElementById('editEmail').value = document.getElementById('emailDisplay').innerText;
+        }
+
+        function saveDetails() {
+            let updatedData = {
+                name: document.getElementById('editName').value,
+                age: document.getElementById('editAge').value,
+                weight: document.getElementById('editWeight').value,
+                height: document.getElementById('editHeight').value,
+                mobile: document.getElementById('editMobile').value,
+                email: document.getElementById('editEmail').value
+            };
+
+            fetch('/update_personal_details', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Details updated successfully!');
+                    location.reload();
+                } else {
+                    alert('Error updating details.');
+                }
+            });
+        }
+
+        function cancelEdit() {
+            document.getElementById('editView').style.display = 'none';
+            document.getElementById('detailsView').style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Food Nutritional Information</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #ffe6e6, #ffffff);
+      font-family: Arial, sans-serif;
+    }
+    .card-img-top {
+      max-height: 300px;
+      object-fit: contain;
+      border-bottom: 1px solid #ddd;
+    }
+    .col-border {
+      border-right: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="card">
+      <img src="{{ url_for('uploaded_file', filename=image_path) }}" class="card-img-top" alt="Uploaded Food Image">
+      <div class="card-body">
+        <h3 class="card-title">Food: {{ result.food_name|capitalize }}</h3>
+        <p class="text-muted">Search Query: {{ result.search_query if result.search_query else result.food_name }}</p>
+        <p>
+          <a href="https://www.google.com/search?q={{ result.food_name }}&tbm=isch" target="_blank" class="btn btn-info">
+            Verify via Google Images
+          </a>
+        </p>
+        <div class="row mt-4">
+          <!-- Left Column: Base Nutritional Info per 100g -->
+          <div class="col-md-6 col-border">
+            <h5>Per 100g (Base)</h5>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Nutrient</th>
+                  <th>Amount</th>
+                  <th>Unit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for nutrient in result.nutrients %}
+                <tr>
+                  <td>{{ nutrient.name }}</td>
+                  <td>{{ nutrient.value }}</td>
+                  <td>{{ nutrient.unit }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <!-- Right Column: Nutritional Info for Entered Quantity -->
+          <div class="col-md-6">
+            <h5>For Your Quantity: {{ result.quantity }}g</h5>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Nutrient</th>
+                  <th>Amount</th>
+                  <th>Unit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for nutrient in result.scaled_nutrients %}
+                <tr>
+                  <td>{{ nutrient.name }}</td>
+                  <td>{{ nutrient.value }}</td>
+                  <td>{{ nutrient.unit }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Chart Section -->
+        <div class="mt-4">
+          <h5>Nutrient Distribution (Bar Chart)</h5>
+          <canvas id="barChart" width="400" height="200"></canvas>
+        </div>
+        <div class="mt-4">
+          <h5>Nutrient Distribution (Pie Chart)</h5>
+          <!-- Pie chart reduced in size by 50% -->
+          <canvas id="pieChart" width="150" height="100"></canvas>
+        </div>
+        <!-- Flot Chart Section -->
+        <div class="mt-4">
+          <h5>Nutrient Distribution (Flot Chart)</h5>
+          <div id="flotChart" style="width: 400px; height: 200px; margin: 0 auto;"></div>
+        </div>
+        <div class="text-center mt-3">
+          <a href="{{ url_for('upload_food') }}" class="btn btn-secondary">Upload Another Image</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Embed the scaled nutrients JSON data -->
+  <script type="application/json" id="nutrient-data">
+    {{ result.scaled_nutrients|tojson }}
+  </script>
+  
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- jQuery and Flot Libraries -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
+  
+  <script>
+    // Parse the scaled nutrient data from the embedded JSON
+    var scaledNutrients = JSON.parse(document.getElementById('nutrient-data').textContent);
+    
+    // Filter for main macronutrients: Energy, Protein, Fat, and Carbohydrate
+    var chartLabels = [];
+    var chartData = [];
+    scaledNutrients.forEach(function(nutrient) {
+      var lowerName = nutrient.name.toLowerCase();
+      if(lowerName.includes("energy") || lowerName.includes("protein") || lowerName.includes("fat") || lowerName.includes("carbohydrate")){
+        chartLabels.push(nutrient.name);
+        chartData.push(nutrient.value);
+      }
+    });
+    
+    // Bar Chart Configuration (Chart.js)
+    var ctxBar = document.getElementById('barChart').getContext('2d');
+    var barChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Nutrient Amount',
+                data: chartData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Pie Chart Configuration (Chart.js) - size reduced by 50%
+    var ctxPie = document.getElementById('pieChart').getContext('2d');
+    var pieChart = new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                data: chartData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+    
+    // Flot Chart Configuration
+    // Prepare data as an array of [index, value]
+    var flotData = [];
+    for (var i = 0; i < chartLabels.length; i++) {
+        flotData.push([i, chartData[i]]);
+    }
+    // Generate ticks for the x-axis from chartLabels
+    var ticks = chartLabels.map(function(label, index) {
+        return [index, label];
+    });
+    
+    $.plot("#flotChart", [{
+        data: flotData,
+        bars: {
+            show: true,
+            barWidth: 0.6,
+            align: "center"
+        }
+    }], {
+        xaxis: {
+            ticks: ticks
+        },
+        grid: {
+            hoverable: true,
+            clickable: true
+        }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Food Calories Estimation</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #ffe6e6, #ffffff);
+      font-family: Arial, sans-serif;
+    }
+    .info-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h1 class="mb-4 text-center">Food Calories Estimation</h1>
+    <div class="row">
+      <!-- Left Column: Information -->
+      <div class="col-md-6">
+        <div class="info-section">
+          <h2>AI-Based Food Calorie Estimation</h2>
+          <p>
+            Our AI-based system uses advanced image processing and machine learning algorithms 
+            to estimate the calorie content of the food you consume. Here's how it works:
+          </p>
+          <ul>
+            <li><strong>Image Preprocessing:</strong> The uploaded food image is resized, normalized, and cleaned to enhance recognition.</li>
+            <li><strong>Object Detection:</strong> A CNN model identifies and segments food items in the image.</li>
+            <li><strong>Feature Extraction:</strong> Key features like shape, size, and texture are extracted to classify food items.</li>
+            <li><strong>Calorie Estimation:</strong> The classified food items are matched against a pre-trained database of calorie values.</li>
+            <li><strong>Results:</strong> The system displays the estimated calorie count along with nutritional information.</li>
+          </ul>
+          <p>
+            This technology helps track your diet, maintain a healthy lifestyle, and achieve your fitness goals!
+          </p>
+        </div>
+      </div>
+      <!-- Right Column: Upload Form -->
+      <div class="col-md-6">
+        <div class="card p-4">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div class="alert alert-warning">
+                <ul>
+                  {% for category, message in messages %}
+                    <li><strong>{{ category }}:</strong> {{ message }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          {% endwith %}
+          <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_food') }}">
+            <div class="mb-3">
+              <label for="food_name" class="form-label">Enter Food Name</label>
+              <input class="form-control" type="text" name="food_name" id="food_name" placeholder="e.g., dosa" required>
+            </div>
+            <div class="mb-3">
+              <label for="food_category" class="form-label">Select Food Category</label>
+              <select class="form-select" name="food_category" id="food_category" required>
+                <option value="Other" selected>Other</option>
+                <option value="Vegetable">Vegetable</option>
+                <option value="Fruits">Fruits</option>
+                <option value="South Indian Food">South Indian Food</option>
+                <option value="North Indian Food">North Indian Food</option>
+                <option value="Snacks">Snacks</option>
+                <option value="Fast Food Veg">Fast Food Veg</option>
+                <option value="Fast Food Nonveg">Fast Food Nonveg</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="quantity" class="form-label">Enter Quantity (in grams)</label>
+              <input class="form-control" type="number" name="quantity" id="quantity" placeholder="e.g., 150" required>
+            </div>
+            <div class="mb-3">
+              <label for="image" class="form-label">Upload Food Image</label>
+              <input class="form-control" type="file" name="image" accept="image/*" id="image" required>
+            </div>
+            <div class="text-center">
+              <button class="btn btn-primary" type="submit">Get Nutritional Info</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
